@@ -69,13 +69,13 @@ if (WIN32)
     macro(FIND_GSTREAMER_COMPONENT _component_prefix _pkgconfig_name _header _library)
         find_path(${_component_prefix}_INCLUDE_DIRS
             NAMES ${_header}
-            PATHS C:/gstreamer/1.0/x86_64/include
+            PATHS C:/gstreamer/1.0/x86_64/include C:/gstreamer/1.0/x86/include
             PATH_SUFFIXES gstreamer-1.0
         )
 
         find_library(${_component_prefix}_LIBRARIES
             NAMES ${_library}
-            PATHS C:/gstreamer/1.0/x86_64/lib
+            PATHS C:/gstreamer/1.0/x86_64/lib C:/gstreamer/1.0/x86/lib
         )
     endmacro()
 else ()
