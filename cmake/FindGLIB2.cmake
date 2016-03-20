@@ -19,83 +19,171 @@
 #  BSD license.
 #  For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 #
-
+# GREGORIAN - Vojage Vojage
 
 IF (GLIB2_LIBRARIES AND GLIB2_INCLUDE_DIRS )
   # in cache already
   SET(GLIB2_FOUND TRUE)
 ELSE (GLIB2_LIBRARIES AND GLIB2_INCLUDE_DIRS )
+  IF ( NOT WIN32 )
+	  INCLUDE(FindPkgConfig)
 
-  INCLUDE(FindPkgConfig)
+	  ## Glib
+	  IF ( GLIB2_FIND_REQUIRED )
+		SET( _pkgconfig_REQUIRED "REQUIRED" )
+	  ELSE ( GLIB2_FIND_REQUIRED )
+		SET( _pkgconfig_REQUIRED "" )
+	  ENDIF ( GLIB2_FIND_REQUIRED )
 
-  ## Glib
-  IF ( GLIB2_FIND_REQUIRED )
-    SET( _pkgconfig_REQUIRED "REQUIRED" )
-  ELSE ( GLIB2_FIND_REQUIRED )
-    SET( _pkgconfig_REQUIRED "" )
-  ENDIF ( GLIB2_FIND_REQUIRED )
-
-  IF ( GLIB2_MIN_VERSION )
-    PKG_SEARCH_MODULE( GLIB2 ${_pkgconfig_REQUIRED} glib-2.0>=${GLIB2_MIN_VERSION} )
-  ELSE ( GLIB2_MIN_VERSION )
-    PKG_SEARCH_MODULE( GLIB2 ${_pkgconfig_REQUIRED} glib-2.0 )
-  ENDIF ( GLIB2_MIN_VERSION )
-  IF ( PKG_CONFIG_FOUND )
-    IF ( GLIB2_FOUND )
-      SET ( GLIB2_CORE_FOUND TRUE )
-    ELSE ( GLIB2_FOUND )
-      SET ( GLIB2_CORE_FOUND FALSE )
-    ENDIF ( GLIB2_FOUND )
-  ENDIF ( PKG_CONFIG_FOUND )
+	  IF ( GLIB2_MIN_VERSION )
+		PKG_SEARCH_MODULE( GLIB2 ${_pkgconfig_REQUIRED} glib-2.0>=${GLIB2_MIN_VERSION} )
+	  ELSE ( GLIB2_MIN_VERSION )
+		PKG_SEARCH_MODULE( GLIB2 ${_pkgconfig_REQUIRED} glib-2.0 )
+	  ENDIF ( GLIB2_MIN_VERSION )
+	  IF ( PKG_CONFIG_FOUND )
+		IF ( GLIB2_FOUND )
+		  SET ( GLIB2_CORE_FOUND TRUE )
+		ELSE ( GLIB2_FOUND )
+		  SET ( GLIB2_CORE_FOUND FALSE )
+		ENDIF ( GLIB2_FOUND )
+	  ENDIF ( PKG_CONFIG_FOUND )
+  ELSE()
+	SET(GLIB2_FOUND FALSE)
+	SET(PKG_CONFIG_FOUND FALSE)
+  ENDIF()
 
   # Look for glib2 include dir and libraries w/o pkgconfig
   IF ( NOT GLIB2_FOUND AND NOT PKG_CONFIG_FOUND )
-    FIND_PATH(
-      _glibconfig_include_DIR
-    NAMES
-      glibconfig.h
-    PATHS
-      /opt/gnome/lib64
-      /opt/gnome/lib
-      /opt/lib/
-      /opt/local/lib
-      /sw/lib/
-      /usr/lib64
-      /usr/lib
-      /usr/local/include
-      ${CMAKE_LIBRARY_PATH}
-    PATH_SUFFIXES
-      glib-2.0/include
-    )
+	IF( WIN32 AND GSTREAMER_FOUND )
+		get_filename_component(_gst_libs_DIR ${GSTREAMER_LIBRARIES} DIRECTORY)
+		SET( _glibconfig_include_DIR ${_gst_libs_DIR}/glib-2.0/include )
+		FIND_PATH(
+		  _glib2_include_DIR
+		NAMES
+		  glib.h
+		PATHS
+		  ${GSTREAMER_INCLUDE_DIRS}
+		PATH_SUFFIXES
+		  ../glib-2.0
+		)
+		
+		FIND_LIBRARY(
+		  _glib2_link_DIR
+		NAMES
+		  glib-2.0
+		  glib
+		PATHS
+		  ${_gst_libs_DIR}
+		)
+		FIND_LIBRARY(
+		  _gio2_link_DIR
+		NAMES
+		  gio-2.0
+		  gio
+		PATHS
+		  ${_gst_libs_DIR}
+		)
+		FIND_LIBRARY(
+		  _gmodule2_link_DIR
+		NAMES	  
+		  gmodule-2.0
+		  gmodule
+		PATHS
+		  ${_gst_libs_DIR}
+		)
+		FIND_LIBRARY(
+		  _gobject2_link_DIR
+		NAMES	  
+		  gobject-2.0
+		  gobject
+		PATHS
+		  ${_gst_libs_DIR}
+		)
+	ELSE( WIN32 AND GSTREAMER_FOUND )
+		FIND_PATH(
+		  _glibconfig_include_DIR
+		NAMES
+		  glibconfig.h
+		PATHS
+		  /opt/gnome/lib64
+		  /opt/gnome/lib
+		  /opt/lib/
+		  /opt/local/lib
+		  /sw/lib/
+		  /usr/lib64
+		  /usr/lib
+		  /usr/local/include
+		  ${CMAKE_LIBRARY_PATH}
+		PATH_SUFFIXES
+		  glib-2.0/include
+		)
 
-    FIND_PATH(
-      _glib2_include_DIR
-    NAMES
-      glib.h
-    PATHS
-      /opt/gnome/include
-      /opt/local/include
-      /sw/include
-      /usr/include
-      /usr/local/include
-    PATH_SUFFIXES
-      glib-2.0
-    )
+		FIND_PATH(
+		  _glib2_include_DIR
+		NAMES
+		  glib.h
+		PATHS
+		  /opt/gnome/include
+		  /opt/local/include
+		  /sw/include
+		  /usr/include
+		  /usr/local/include
+		PATH_SUFFIXES
+		  glib-2.0
+		)
 
-    #MESSAGE(STATUS "Glib headers: ${_glib2_include_DIR}")
+		#MESSAGE(STATUS "Glib headers: ${_glib2_include_DIR}")
 
-    FIND_LIBRARY(
-      _glib2_link_DIR
-    NAMES
-      glib-2.0
-      glib
-    PATHS
-      /opt/gnome/lib
-      /opt/local/lib
-      /sw/lib
-      /usr/lib
-      /usr/local/lib
-    )
+		FIND_LIBRARY(
+		  _glib2_link_DIR
+		NAMES
+		  glib-2.0
+		  glib
+		PATHS
+		  /opt/gnome/lib
+		  /opt/local/lib
+		  /sw/lib
+		  /usr/lib
+		  /usr/local/lib
+		)
+		FIND_LIBRARY(
+		  _gio2_link_DIR
+		NAMES
+		  gio-2.0
+		  gio
+		PATHS
+		  /opt/gnome/lib
+		  /opt/local/lib
+		  /sw/lib
+		  /usr/lib
+		  /usr/local/lib
+		)
+		FIND_LIBRARY(
+		  _gmodule2_link_DIR
+		NAMES
+		  gmodule-2.0
+		  gmodule
+		PATHS
+		  /opt/gnome/lib
+		  /opt/local/lib
+		  /sw/lib
+		  /usr/lib
+		  /usr/local/lib
+		)
+		FIND_LIBRARY(
+		  _gobject2_link_DIR
+		NAMES
+		  gobject-2.0
+		  gobject
+		PATHS
+		  /opt/gnome/lib
+		  /opt/local/lib
+		  /sw/lib
+		  /usr/lib
+		  /usr/local/lib
+		)
+	ENDIF( WIN32 AND GSTREAMER_FOUND )
+    
     IF ( _glib2_include_DIR AND _glib2_link_DIR )
         SET ( _glib2_FOUND TRUE )
     ENDIF ( _glib2_include_DIR AND _glib2_link_DIR )
@@ -103,7 +191,7 @@ ELSE (GLIB2_LIBRARIES AND GLIB2_INCLUDE_DIRS )
 
     IF ( _glib2_FOUND )
         SET ( GLIB2_INCLUDE_DIRS ${_glib2_include_DIR} ${_glibconfig_include_DIR} )
-        SET ( GLIB2_LIBRARIES ${_glib2_link_DIR} )
+        SET ( GLIB2_LIBRARIES ${_glib2_link_DIR} ${_gio2_link_DIR}  ${_gmodule2_link_DIR} ${_gobject2_link_DIR} )
         SET ( GLIB2_CORE_FOUND TRUE )
     ELSE ( _glib2_FOUND )
         SET ( GLIB2_CORE_FOUND FALSE )
@@ -112,27 +200,37 @@ ELSE (GLIB2_LIBRARIES AND GLIB2_INCLUDE_DIRS )
     # Handle dependencies
     # libintl
     IF ( NOT LIBINTL_FOUND )
-      FIND_PATH(LIBINTL_INCLUDE_DIR
-      NAMES
-        libintl.h
-      PATHS
-        /opt/gnome/include
-        /opt/local/include
-        /sw/include
-        /usr/include
-        /usr/local/include
-      )
+		IF( WIN32 AND GSTREAMER_FOUND )
+			SET( LIBINTL_INCLUDE_DIR ${GSTREAMER_INCLUDE_DIRS}/.. )
+			FIND_LIBRARY(LIBINTL_LIBRARY
+			  NAMES
+				intl
+			  PATHS
+				${_gst_libs_DIR}
+			)
+		ELSE( WIN32 AND GSTREAMER_FOUND )
+			FIND_PATH(LIBINTL_INCLUDE_DIR
+			  NAMES
+				libintl.h
+			  PATHS
+				/opt/gnome/include
+				/opt/local/include
+				/sw/include
+				/usr/include
+				/usr/local/include
+			)
 
-      FIND_LIBRARY(LIBINTL_LIBRARY
-      NAMES
-        intl
-      PATHS
-        /opt/gnome/lib
-        /opt/local/lib
-        /sw/lib
-        /usr/local/lib
-        /usr/lib
-      )
+			FIND_LIBRARY(LIBINTL_LIBRARY
+			  NAMES
+				intl
+			  PATHS
+				/opt/gnome/lib
+				/opt/local/lib
+				/sw/lib
+				/usr/local/lib
+				/usr/lib
+			)
+		ENDIF( WIN32 AND GSTREAMER_FOUND )
 
       IF (LIBINTL_LIBRARY AND LIBINTL_INCLUDE_DIR)
         SET (LIBINTL_FOUND TRUE)
@@ -141,31 +239,41 @@ ELSE (GLIB2_LIBRARIES AND GLIB2_INCLUDE_DIRS )
 
     # libiconv
     IF ( NOT LIBICONV_FOUND )
-      FIND_PATH(LIBICONV_INCLUDE_DIR
-      NAMES
-        iconv.h
-      PATHS
-        /opt/gnome/include
-        /opt/local/include
-        /opt/local/include
-        /sw/include
-        /sw/include
-        /usr/local/include
-        /usr/include
-      PATH_SUFFIXES
-        glib-2.0
-      )
+		IF( WIN32 AND GSTREAMER_FOUND )
+			SET( LIBICONV_INCLUDE_DIR ${GSTREAMER_INCLUDE_DIRS}/.. )
+			FIND_LIBRARY(LIBICONV_LIBRARY
+			  NAMES
+				iconv
+			  PATHS
+				${_gst_libs_DIR}
+			)
+		ELSE( WIN32 AND GSTREAMER_FOUND )
+			FIND_PATH(LIBICONV_INCLUDE_DIR
+			  NAMES
+				iconv.h
+			  PATHS
+				/opt/gnome/include
+				/opt/local/include
+				/opt/local/include
+				/sw/include
+				/sw/include
+				/usr/local/include
+				/usr/include
+			  PATH_SUFFIXES
+				glib-2.0
+			  )
 
-      FIND_LIBRARY(LIBICONV_LIBRARY
-      NAMES
-        iconv
-      PATHS
-        /opt/gnome/lib
-        /opt/local/lib
-        /sw/lib
-        /usr/lib
-        /usr/local/lib
-      )
+			  FIND_LIBRARY(LIBICONV_LIBRARY
+			  NAMES
+				iconv
+			  PATHS
+				/opt/gnome/lib
+				/opt/local/lib
+				/sw/lib
+				/usr/lib
+				/usr/local/lib
+			  )
+		ENDIF( WIN32 AND GSTREAMER_FOUND )
 
       IF (LIBICONV_LIBRARY AND LIBICONV_INCLUDE_DIR)
         SET (LIBICONV_FOUND TRUE)
