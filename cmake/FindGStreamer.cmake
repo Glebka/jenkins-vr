@@ -155,6 +155,14 @@ endforeach ()
 include(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(GStreamer REQUIRED_VARS ${_GSTREAMER_REQUIRED_VARS}
                                             VERSION_VAR   GSTREAMER_VERSION)
+if (WIN32)
+	find_path(_gst_config_include_DIR
+			NAMES gst/gstconfig.h
+			PATHS C:/gstreamer/1.0/x86/lib C:/gstreamer/1.0/x86_64/lib
+			PATH_SUFFIXES gstreamer-1.0/include
+	)
+	list(APPEND GSTREAMER_INCLUDE_DIRS ${_gst_config_include_DIR})
+endif(WIN32)
 
 mark_as_advanced(
     GSTREAMER_APP_INCLUDE_DIRS
