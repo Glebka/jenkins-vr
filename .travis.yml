@@ -1,11 +1,13 @@
+sudo: required
 language: cpp
-compiler:
-  - gcc
-  - clang
+services:
+  - docker
+  
 before_install:
-  - sudo apt-get update -qq
-install:
-  - sudo apt-get install make cmake gstreamer1.0-x gstreamer1.0-plugins-good gstreamer1.0-plugins-bad libgstreamer1.0-dev
+  - docker build -t buildenv .
+  - docker run --name=jenkins-vr-buildenv --rm -t -i
 before_script:
+  - cd /root/jenkins-vr
+script:
   - cmake .
-script: make
+  - make
