@@ -162,6 +162,23 @@ if (WIN32)
 			PATH_SUFFIXES gstreamer-1.0/include
 	)
 	list(APPEND GSTREAMER_INCLUDE_DIRS ${_gst_config_include_DIR})
+else(WIN32)
+	FIND_PATH(
+		  _gst_config_include_DIR
+		NAMES
+		  gst/gstconfig.h
+		PATHS
+		  /opt/lib/
+		  /opt/local/lib
+		  /sw/lib/
+		  /usr/lib64
+		  /usr/lib
+		  /usr/local/include
+		  ${CMAKE_LIBRARY_PATH}
+		PATH_SUFFIXES
+		  gstreamer-1.0/include
+		)
+	list(APPEND GSTREAMER_INCLUDE_DIRS ${_gst_config_include_DIR})
 endif(WIN32)
 
 mark_as_advanced(
