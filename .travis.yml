@@ -6,8 +6,10 @@ services:
 before_install:
   - docker build -t buildenv .
   - docker run --name=jenkins-vr-buildenv --rm -t -i
+
 before_script:
   - cd /root/jenkins-vr
+
 script:
   - cmake .
   - make
