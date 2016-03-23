@@ -5,8 +5,6 @@ services:
   
 before_install:
   - docker build -t buildenv .
-  - docker run --rm -t -i buildenv /bin/sh -c "cd /root/jenkins-vr; cmake . && make"
 
 script:
-  - cmake .
-  - make
+  - docker run --rm -t -i buildenv /bin/sh -c "cd /root/jenkins-vr; cmake . && make"
