@@ -1,0 +1,15 @@
+--- a/src/libpocketsphinx/kws_search.c
++++ b/src/libpocketsphinx/kws_search.c
+@@ -456,10 +456,10 @@ kws_search_free(ps_search_t * search)
+ {
+     int i;
+     kws_search_t *kwss;
+-
++    double n_speech = 0.0;
+     kwss = (kws_search_t *) search;
+ 
+-    double n_speech = (double)kwss->n_tot_frame
++    n_speech = (double)kwss->n_tot_frame
+             / cmd_ln_int32_r(ps_search_config(kwss), "-frate");
+ 
+     E_INFO("TOTAL kws %.2f CPU %.3f xRT\n",

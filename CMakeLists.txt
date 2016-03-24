@@ -18,6 +18,9 @@ set(headers
 set(sources
 	src/main.cpp
 )
+
+add_subdirectory(libs)
+
 message(STATUS ${GSTREAMER_LIBRARIES})
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Debug CACHE STRING
