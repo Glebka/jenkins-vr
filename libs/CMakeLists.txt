@@ -19,14 +19,16 @@ else()
 		SOURCE_DIR sphinxbase
 		CONFIGURE_COMMAND ${PROJECT_SOURCE_DIR}/sphinxbase/autogen.sh
 		BUILD_COMMAND make
+		INSTALL_COMMAND make install
 		BUILD_IN_SOURCE 1
 	)
 	ExternalProject_Add(pocketsphinx
 		DOWNLOAD_COMMAND ""
 		SOURCE_DIR pocketsphinx
-		CONFIGURE_COMMAND "${PROJECT_SOURCE_DIR}/pocketsphinx/autogen.sh --with-sphinxbase=auto"
+		CONFIGURE_COMMAND ${PROJECT_SOURCE_DIR}/pocketsphinx/autogen.sh --with-sphinxbase=auto
 		BUILD_COMMAND make
 		BUILD_IN_SOURCE 1
+		INSTALL_COMMAND make install
 		DEPENDS sphinxbase
 	)
 endif()
