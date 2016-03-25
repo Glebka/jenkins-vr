@@ -24,7 +24,7 @@ else()
 	ExternalProject_Add(pocketsphinx
 		DOWNLOAD_COMMAND ""
 		SOURCE_DIR pocketsphinx
-		CONFIGURE_COMMAND ${PROJECT_SOURCE_DIR}/pocketsphinx/autogen.sh
+		CONFIGURE_COMMAND "${PROJECT_SOURCE_DIR}/pocketsphinx/autogen.sh --with-sphinxbase=auto"
 		BUILD_COMMAND make
 		BUILD_IN_SOURCE 1
 		DEPENDS sphinxbase
