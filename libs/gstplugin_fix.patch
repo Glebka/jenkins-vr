@@ -1,0 +1,28 @@
+--- a/src/gst-plugin/gstpocketsphinx.c
++++ b/src/gst-plugin/gstpocketsphinx.c
+@@ -648,6 +648,7 @@ gst_pocketsphinx_finalize_utt(GstPocketSphinx *ps)
+     GstBuffer *buffer;
+     char const *hyp;
+     int32 score;
++	ps_lattice_t *dag;
+ 
+     hyp = NULL;
+     if (!ps->listening_started || !ps->utt_started)
+@@ -665,7 +666,6 @@ gst_pocketsphinx_finalize_utt(GstPocketSphinx *ps)
+ 	sprintf(uttid, "%09u", ps->uttno);
+ 	ps->uttno++;
+         latfile = string_join(ps->latdir, "/", uttid, ".lat", NULL);
+-        ps_lattice_t *dag;
+         if ((dag = ps_get_lattice(ps->ps)))
+             ps_lattice_write(dag, latfile);
+         ckd_free(latfile);
+@@ -723,7 +723,8 @@ plugin_init(GstPlugin * plugin)
+     return TRUE;
+ }
+ 
+-#define PACKAGE PACKAGE_NAME
++#define PACKAGE "CMU Sphinx"
++#define PACKAGE_VERSION "1.0"
+ GST_PLUGIN_DEFINE(GST_VERSION_MAJOR,
+                   GST_VERSION_MINOR,
+                   pocketsphinx,

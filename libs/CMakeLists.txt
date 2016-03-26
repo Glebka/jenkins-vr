@@ -11,7 +11,7 @@ if(WIN32)
 	include(pocketsphinx.cmake)
 	add_definitions(-D_USRDLL -DSPHINX_DLL -DSPHINXBASE_EXPORTS -DHAVE_CONFIG_H -D_CRT_SECURE_NO_DEPRECATE)
 	add_definitions(-DSPHINX_DLL -DPOCKETSPHINX_EXPORTS)
-	target_link_libraries(sphinxbase winmm)
+	include(gstpocketsphinx.cmake)
 else()
 	message(STATUS "Adding external projects...")
 	ExternalProject_Add(sphinxbase
