@@ -1,0 +1,47 @@
+@startuml
+[*] --> ListenKeyWord
+note right of ListenKeyWord: ALL 4 LOVE - Enjoy the Silence
+state ListenKeyWord {
+   [*] --> StartListeningKeyWord
+   StartListeningKeyWord: entry/recognizer.setMode(KEY_WORD_SEARCH)
+   StartListeningKeyWord: do/recognizer.listen()
+   StartListeningKeyWord -> ListeningKeyWord : onEventStartListening [e.status==true]
+   ListeningKeyWord --> StartListeningKeyWord : onRecognitionResult  [e.text!=KEY_WORD || e.status!=true]
+}
+ListenKeyWord -> [*] : onEventStartListening [e.status==false]
+ListenKeyWord --> Dialog : onRecognitionResult  [e.text==KEY_WORD]
+state Dialog {
+   [*] --> StartBeep
+   StartBeep: entry/player.startPlaying(startbeep.wav)
+   StartBeep --> StartListeningCommand: onEventStartPlaying [e.status==false]
+   StartBeep --> StartListeningCommand: onEventStopPlaying
+   StartListeningCommand: entry/recognizer.setMode(GRAMMAR_SEARCH)
+   StartListeningCommand: do/recognizer.listen()
+   StartListeningCommand --> ListeningCommand: onEventStartListening [e.status==true]
+   ListeningCommand: entry/timer.start(3000)
+   ListeningCommand: exit/timer.stop()
+   ListeningCommand --> ListeningCommand: onEventListening
+   ListeningCommand --> Prompt: onEventTimer
+   Prompt: entry/recognizer.stopListeningSync()
+   Prompt: do/prompter.prompt()
+   Prompt --> StartListeningCommand: onEventStopSaying [prompter.hitCount()<2]
+   Prompt --> StopBeep: onEventStopSaying [prompter.hitCount()==2]
+   StopBeep: entry/player.startPlaying(stopbeep.wav)
+   StopBeep: do/prompter.reset()
+   StopBeep: do/interpreter.reset()
+   ListeningCommand --> ParseCommand: onEventRecognitionResult [e.status==true]
+   ParseCommand: entry/recognizer.stopListeningSync()
+   ParseCommand: do/interpreter.parseCommand(e.text)
+   ParseCommand: do/^Next
+   ParseCommand --> PromptError: onEventNext [!interpreter.isValidCommand()]
+   ParseCommand --> ExecuteCommand: onEventNext [!interpreter.isParamsNeeded()]
+   ExecuteCommand: entry/interpreter.executeCommand()
+   ExecuteCommand --> PromptError: onExecuteCommandFailed
+   ExecuteCommand --> StopBeep: onExecuteCommandFinished
+   ListeningCommand --> PromptError: onEventRecognitionResult [e.status==false]
+   PromptError: entry/recognizer.stopListeningSync()
+   PromptError: do/prompter.prompt(PROMPT_CANCEL)
+   PromptError --> StopBeep: onEventStopSaying
+}
+Dialog --> ListenKeyWord: onEventStopPlaying
+@enduml
