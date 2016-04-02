@@ -1,10 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
-project(sphinx_vr)
+
 include(ExternalProject)
-if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Debug CACHE STRING
-  "Choose the type of build: Debug/Release" FORCE)
-endif()
 
 if(WIN32)
 	include(sphinxbase.cmake)
@@ -12,6 +8,14 @@ if(WIN32)
 	add_definitions(-D_USRDLL -DSPHINX_DLL -DSPHINXBASE_EXPORTS -DHAVE_CONFIG_H -D_CRT_SECURE_NO_DEPRECATE)
 	add_definitions(-DSPHINX_DLL -DPOCKETSPHINX_EXPORTS)
 	include(gstpocketsphinx.cmake)
+	
+	set(BUILD_CURL_EXE OFF CACHE BOOL "Set to ON to build cURL executable.")
+	set(BUILD_CURL_TESTS OFF CACHE BOOL "Set to ON to build cURL tests.")
+	set(HTTP_ONLY ON CACHE BOOL "disables all protocols except HTTP (This overrides all CURL_DISABLE_* options)")
+	set(ENABLE_IPV6 OFF CACHE BOOL "Define if you want to enable IPv6 support")
+	set(ENABLE_MANUAL OFF CACHE BOOL "to provide the built-in manual")
+	add_subdirectory(curl)
+	
 else()
 	message(STATUS "Adding external projects...")
 	ExternalProject_Add(sphinxbase
@@ -30,5 +34,13 @@ else()
 		BUILD_IN_SOURCE 1
 		INSTALL_COMMAND make install
 		DEPENDS sphinxbase
+	)
+	ExternalProject_Add(curl
+		DOWNLOAD_COMMAND ""
+		SOURCE_DIR curl
+		CONFIGURE_COMMAND ${PROJECT_SOURCE_DIR}/curl/buildconf && ${PROJECT_SOURCE_DIR}/curl/configure --enable-http --libdir=/usr/lib --includedir=/usr/include
+		BUILD_COMMAND make
+		BUILD_IN_SOURCE 1
+		INSTALL_COMMAND make install
 	)
 endif()
