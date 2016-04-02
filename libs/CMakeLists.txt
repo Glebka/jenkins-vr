@@ -21,7 +21,7 @@ else()
 	ExternalProject_Add(sphinxbase
 		DOWNLOAD_COMMAND ""
 		SOURCE_DIR sphinxbase
-		CONFIGURE_COMMAND ${PROJECT_SOURCE_DIR}/sphinxbase/autogen.sh --without-python --libdir=/usr/lib --includedir=/usr/include
+		CONFIGURE_COMMAND ${PROJECT_SOURCE_DIR}/libs/sphinxbase/autogen.sh --without-python --libdir=/usr/lib --includedir=/usr/include
 		BUILD_COMMAND make
 		INSTALL_COMMAND make install
 		BUILD_IN_SOURCE 1
@@ -29,7 +29,7 @@ else()
 	ExternalProject_Add(pocketsphinx
 		DOWNLOAD_COMMAND ""
 		SOURCE_DIR pocketsphinx
-		CONFIGURE_COMMAND ${PROJECT_SOURCE_DIR}/pocketsphinx/autogen.sh --without-python --with-sphinxbase=auto --libdir=/usr/lib --includedir=/usr/include
+		CONFIGURE_COMMAND ${PROJECT_SOURCE_DIR}/libs/pocketsphinx/autogen.sh --without-python --with-sphinxbase=auto --libdir=/usr/lib --includedir=/usr/include
 		BUILD_COMMAND make
 		BUILD_IN_SOURCE 1
 		INSTALL_COMMAND make install
@@ -38,7 +38,7 @@ else()
 	ExternalProject_Add(curl
 		DOWNLOAD_COMMAND ""
 		SOURCE_DIR curl
-		CONFIGURE_COMMAND ${PROJECT_SOURCE_DIR}/curl/buildconf && ${PROJECT_SOURCE_DIR}/curl/configure --enable-http --libdir=/usr/lib --includedir=/usr/include
+		CONFIGURE_COMMAND ${PROJECT_SOURCE_DIR}/libs/curl/buildconf && ${PROJECT_SOURCE_DIR}/libs/curl/configure --enable-http --libdir=/usr/lib --includedir=/usr/include
 		BUILD_COMMAND make
 		BUILD_IN_SOURCE 1
 		INSTALL_COMMAND make install
