@@ -10,6 +10,7 @@
 
 #include <string>
 #include <vector>
+#include <boost/shared_ptr.hpp>
 #include <boost/property_tree/ptree.hpp>
 
 namespace api
@@ -22,6 +23,10 @@ namespace api
          JOB_ENABLED
       };
    }
+
+   class ICIClient;
+
+   typedef boost::shared_ptr<ICIClient> CIClientPtr;
 
    /**
     * Interface for CI server client implementations:
