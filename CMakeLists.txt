@@ -6,7 +6,12 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
 find_package(GStreamer 1.6.3 REQUIRED)
 find_package(GLIB2 REQUIRED)
-find_package(Boost REQUIRED COMPONENTS system date_time thread program_options regex)
+
+set(Boost_USE_STATIC_LIBS        ON CACHE BOOL "")
+set(Boost_USE_MULTITHREADED      ON CACHE BOOL "")
+set(Boost_USE_STATIC_RUNTIME    OFF CACHE BOOL "") 
+
+find_package(Boost REQUIRED COMPONENTS system date_time chrono thread program_options regex)
 
 include_directories(SYSTEM
    ${GSTREAMER_INCLUDE_DIRS}
@@ -40,4 +45,5 @@ add_executable(jenkins-vr
 target_link_libraries(jenkins-vr
    ${GSTREAMER_LIBRARIES}
    ${GLIB2_LIBRARIES}
+   ${Boost_LIBRARIES}
 )
