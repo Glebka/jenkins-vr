@@ -1,7 +1,7 @@
 #include <iostream>
 #include <gst/gst.h>
 
-#include "imp/CLogger.hpp"
+#include "imp/logger/CLogger.hpp"
 
 int main()
 {
