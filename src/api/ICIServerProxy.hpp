@@ -24,6 +24,7 @@ namespace api
     */
    class ICIServerProxy
    {
+   public:
       virtual ~ICIServerProxy( void ) = 0;
       virtual bool connect( const std::string& userName, const std::string& password ) = 0;
       virtual void disconnect( void ) = 0;

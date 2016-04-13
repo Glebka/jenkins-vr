@@ -23,6 +23,7 @@ namespace api
 
    class IJob
    {
+   public:
       virtual ~IJob( void ) = 0;
 
       virtual std::string getName( void ) const = 0;

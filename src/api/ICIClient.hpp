@@ -34,6 +34,7 @@ namespace api
     */
    class ICIClient
    {
+   public:
       virtual ~ICIClient( void ) = 0;
 
       /**
