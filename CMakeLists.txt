@@ -19,6 +19,10 @@ include_directories(SYSTEM
    ${GLIB2_INCLUDE_DIRS}
 )
 
+include_directories(
+   src
+)
+
 add_subdirectory(libs)
 
 message(STATUS ${GSTREAMER_LIBRARIES})
@@ -47,3 +51,8 @@ target_link_libraries(jenkins-vr
    ${GLIB2_LIBRARIES}
    ${Boost_LIBRARIES}
 )
+if(WIN32)
+   target_link_libraries(jenkins-vr
+      sapi.lib
+   )
+endif()

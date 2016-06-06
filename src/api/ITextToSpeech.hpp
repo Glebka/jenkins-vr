@@ -42,7 +42,7 @@ namespace api
    class ITextToSpeech
    {
    public:
-      virtual ~ITextToSpeech( void ) = 0;
+      virtual ~ITextToSpeech( void ) = 0 {};
 
       virtual std::vector<std::string> getAvailableLanguages( void ) const = 0;
       virtual std::string getCurrentLanguage( void ) const = 0;
