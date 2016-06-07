@@ -1,9 +1,4 @@
-FROM logankoester/archlinux
-RUN pacman -Sy --noconfirm archlinux-keyring
-RUN pacman-key --refresh-keys
-RUN pacman -Syyu --noconfirm
-RUN pacman-db-upgrade
-RUN pacman -S --noconfirm make cmake gcc git pkg-config autoconf automake bison libtool doxygen python swig boost
-RUN pacman -S --noconfirm gstreamer 
-RUN pacman -S --noconfirm gst-plugins-base
+FROM ubuntu:14.04
+RUN apt-get install -y make cmake gcc pkg-config build-essential build-essential bison libtool doxygen python swig libboost-all-dev
+RUN apt-get install -y libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev gstreamer1.0-plugins-base-apps gstreamer1.0-plugins-base gstreamer1.0-tools
 RUN git clone --recursive https://github.com/Glebka/jenkins-vr.git /root/jenkins-vr
