@@ -10,6 +10,15 @@
 
 #endif
 
+void handler1( api::tts::StartSpeakingData data )
+{
+   CLogger::info() << "StartSpeaking event: " << data.status << "; '" << data.text << "'";
+}
+
+void handler2( api::tts::StopSpeakingData data )
+{
+   CLogger::info() << "StopSpeaking event";
+}
 
 int main()
 {
@@ -22,14 +31,16 @@ int main()
    CLogger::debug() << "Hello debug! " << "This is on the same line.";
 
 #ifdef _WIN32
-   api::TextToSpeechPtr tts = CWinTTS::create();
+   api::tts::TextToSpeechPtr tts = CWinTTS::create();
 
    std::cout << tts->getCurrentLanguage() << std::endl;
-   tts->setLanguage( "en-US" );
+   tts->setLanguage( "en-GB" );
    std::cout << tts->getCurrentLanguage() << std::endl;
-   tts->saySync( "Hello! I'm glad to see you!" );
-   tts->setLanguage( "ru-RU" );
-   tts->saySync( "Hello! I'm glad to see you!" );
+   tts->onStartSpeaking( handler1 );
+   tts->onStopSpeaking( handler2 );
+   tts->saySync( "This is a test string for computer voice" );
+   system("pause");
+   tts->sayAsync( "This is a test string for computer voice" );
    system("pause");
 #endif
 	return 0;
