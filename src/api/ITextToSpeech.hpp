@@ -86,7 +86,7 @@ namespace api
 
          /**
           * Starts saying specified text and returns immediately.
-          * Emits StartSpeaking signal. StopSpeaking signal will be emited after the end of speach.
+          * Emits StartSpeaking signal. StopSpeaking signal will be emitted after the end of speach.
           * @sa api::tts::StartSpeakingSignal_t
           * @sa api::tts::StartSpeakingData
           * @sa api::tts::StopSpeakingSignal_t
@@ -97,7 +97,7 @@ namespace api
          virtual bool sayAsync( const std::string& text ) = 0;
 
          /**
-          * Starts saying specified text and waits for complition.
+          * Starts saying specified text and waits for completion.
           * Emits StartSpeaking signal at start and StopSpeaking signal - at the end.
           * @sa api::tts::StartSpeakingSignal_t
           * @sa api::tts::StartSpeakingData
@@ -115,7 +115,7 @@ namespace api
 
          /**
           * Interrupts current speach.
-          * As a result the StopSpeaking signal will be emited.
+          * As a result the StopSpeaking signal will be emitted.
           * @sa sayAsync()
           * @sa saySync()
           * @sa api::tts::StopSpeakingSignal_t

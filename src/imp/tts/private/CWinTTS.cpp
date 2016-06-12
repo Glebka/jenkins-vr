@@ -171,17 +171,21 @@ bool CWinTTS::sayAsync( const std::string& text )
    CA2W unicodeStr( text.c_str() );
 
    HRESULT hr = mVoice->Speak( unicodeStr, SPF_PURGEBEFORESPEAK | SPF_ASYNC, NULL );
-   HANDLE waitHandle = mVoice->SpeakCompleteEvent();
-   boost::thread notifier = boost::thread([this,waitHandle]( void ) {
-      if ( WaitForSingleObject( waitHandle, MAX_WAIT_TIME_MS ) != WAIT_OBJECT_0 )
-      {
-         std::string message( "Can't initialize COM instance." );
-         CLogger::fatal() << message;
-         throw std::exception( message.c_str() );
-      }
-      mStopSpeakingSignal( StopSpeakingData() );
-   });
-   mStartSpeakingSignal( StartSpeakingData( text, true ) );
+   if ( !FAILED( hr ) )
+   {
+      HANDLE waitHandle = mVoice->SpeakCompleteEvent();
+      boost::thread notifier = boost::thread([this,waitHandle]( void ) {
+         if ( WaitForSingleObject( waitHandle, MAX_WAIT_TIME_MS ) != WAIT_OBJECT_0 )
+         {
+            std::string message( "Can't initialize COM instance." );
+            CLogger::fatal() << message;
+            throw std::exception( message.c_str() );
+         }
+         mStopSpeakingSignal( StopSpeakingData() );
+      });
+      notifier.detach();
+   }
+   mStartSpeakingSignal( StartSpeakingData( text, !FAILED( hr ) ) );
    return !FAILED( hr );
 }
 
@@ -209,7 +213,6 @@ void CWinTTS::stopSpeaking( void )
    {
       ULONG skipped = 0;
       WINAPI_RUN_CHECKED( mVoice->Skip( L"SENTENCE", INT_MAX, &skipped ), "Can't skip current TTS task." );
-      mStopSpeakingSignal( StopSpeakingData() );
    }
 }
 
