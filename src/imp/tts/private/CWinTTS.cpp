@@ -27,7 +27,7 @@ static void WINAPI_RUN_CHECKED( HRESULT winApiCallResult, const std::string& err
    if ( FAILED( winApiCallResult ) )
    {
       CLogger::fatal() << errorMessage;
-      throw std::exception( errorMessage.c_str() );
+      throw std::runtime_error( errorMessage );
    }
 }
 
@@ -178,7 +178,7 @@ bool CWinTTS::sayAsync( const std::string& text )
          {
             std::string message( "Can't initialize COM instance." );
             CLogger::fatal() << message;
-            throw std::exception( message.c_str() );
+            throw std::runtime_error( message );
          }
          mStopSpeakingSignal( StopSpeakingData() );
       });

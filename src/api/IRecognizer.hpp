@@ -10,6 +10,7 @@
 
 #include <string>
 #include <boost/shared_ptr.hpp>
+#include <vector>
 
 #include "Signals.hpp"
 
@@ -22,6 +23,8 @@ namespace api
    {
       class IRecognizer;   ///< Forward declaration of speech recognizer interface
       typedef boost::shared_ptr<IRecognizer> RecognizerPtr;
+      typedef std::pair<std::string, std::string> GraphemePhoneme;   ///< Word and it's pronunciation
+      typedef std::vector<GraphemePhoneme> GraphemePhonemeList;      ///< List of words and their pronunciations
 
       namespace RecognizerMode
       {
@@ -75,9 +78,9 @@ namespace api
        */
       struct StopListeningData {};
 
-      typedef signals::signal<void ( const StartListeningData& e )> StartListeningSignal_t;        ///< StartListening signal type
-      typedef signals::signal<void ( const RecognitionResultData& e )> RecognitionResultSignal_t;  ///< RecognitionResult signal type
-      typedef signals::signal<void ( const StopListeningData& e )> StopListeningSignal_t;          ///< StopListening signal type
+      typedef signals::signal<void ( StartListeningData e )> StartListeningSignal_t;        ///< StartListening signal type
+      typedef signals::signal<void ( RecognitionResultData e )> RecognitionResultSignal_t;  ///< RecognitionResult signal type
+      typedef signals::signal<void ( StopListeningData e )> StopListeningSignal_t;          ///< StopListening signal type
 
       /**
        * Speech recognizer interface class
@@ -129,6 +132,14 @@ namespace api
           * @sa onStopListening()
           */
          virtual void stopListening( void ) = 0;
+
+         /**
+          * Extends existing pronunciation dictionary and language model with new words.
+          * Previous phonetization will be discarded.
+          * @param group - the group of entities that should be updated, for example, 'projects'
+          * @param g2pList - list of pairs 'grapheme' - 'phoneme' that should be added to the dictionary and grammar
+          */
+         virtual bool phonetize( const std::string& group, const GraphemePhonemeList& g2pList ) = 0;
 
          /**
           * Register handler for StartListening signal.

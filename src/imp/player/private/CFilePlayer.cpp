@@ -9,18 +9,20 @@
 #include <gst/gst.h>
 #include <glib.h>
 #include <boost/format.hpp>
-#include <boost/thread.hpp>
 #include <boost/chrono.hpp>
 
 #include "imp/player/CFilePlayer.hpp"
 #include "imp/logger/CLogger.hpp"
+#include "imp/gstreamer/CGstPipeline.hpp"
 
 using namespace api::player;
 
-static const guint64 MAX_WAIT_TIMEOUT = 5 * GST_SECOND;
-static const int MAX_PLAYBACK_DURATION_SEC = 30;
+GST_DEBUG_CATEGORY_STATIC (player_debug);
 
-static const char* PIPELINE_SPEC = "filesrc name=fsrc ! wavparse ! audioconvert ! autoaudiosink";
+static const guint64 MAX_WAIT_TIMEOUT = 5 * GST_SECOND;
+static const int MAX_PLAYBACK_DURATION_SEC = 10;
+
+static const char* PIPELINE_SPEC = "filesrc name=fsrc ! wavparse ! audioconvert ! audioresample ! autoaudiosink name=sink";
 static const char* FILESRC_NAME = "fsrc";
 static const char* FILESRC_LOCATION_PARAM = "location";
 
@@ -29,44 +31,53 @@ static const char* FILESRC_ERROR_MSG = "Can't create the filesrc element, GStrea
 static const char* PLAYER_ERROR_MSG = "Player may be in inconsistent state. Aborting.";
 static const char* PARSE_ERROR_MSG = "GStreamer error (%1%): %2%";
 
+typedef boost::shared_ptr<GMainLoop> MainLoopPtr;
+
+static void finalizeMainLoop( GMainLoop* loop )
+{
+    g_main_loop_quit( loop );
+    g_main_loop_unref( loop );
+}
+
+/**
+ * TODO: make common hpp and cpp files and move utility functions to it.
+ */
 static void THROW_FATAL( const std::string&  message )
 {
    CLogger::fatal() << message;
-   throw std::exception( message.c_str() );
+   throw std::runtime_error( message );
 }
 
+/**
+ * TODO: refactor here, move to separate file
+ */
 class CFilePlayer::CGstPlayerPipeline: boost::noncopyable
 {
 public:
    CGstPlayerPipeline( void )
-      : mPipeline( NULL )
-      , mFileSrc( NULL )
+      : mPipeline( CGstPipeline( PIPELINE_SPEC ) )
+      , mFileSrc( mPipeline.getElementByName( FILESRC_NAME ) )
+      , mSink( mPipeline.getElementByName( "sink" ) )
+      , mSinkPad( mSink.getSinkPad() )
       , mLoop( NULL ) 
       , mIsEos( false )
    {
-      GError* error = NULL;
-      GstElement* pipeline = gst_parse_launch( PIPELINE_SPEC, &error );
-      if ( error )
-      {
-         CLogger::warning() << str( boost::format( PARSE_ERROR_MSG ) % error->code % error->message );
-         g_error_free( error );
-      }
-      if ( pipeline == NULL )
+      GST_DEBUG_CATEGORY_INIT (player_debug, "CGstPlayerPipeline", 0, "CGstPlayerPipeline");
+      GST_CAT_DEBUG( player_debug, "Constructor" );
+      if ( !mPipeline.isValid() )
       {
          THROW_FATAL( PIPELINE_ERROR_MSG );
       }
-      mPipeline = GST_PIPELINE( pipeline );
-      mFileSrc = gst_bin_get_by_name( GST_BIN( pipeline ), FILESRC_NAME );
-      if ( mFileSrc == NULL )
+      if ( !mFileSrc.isValid() )
       {
          THROW_FATAL( FILESRC_ERROR_MSG );
       }
-      mLoop = g_main_loop_new( NULL, FALSE );
-      GstBus* bus = gst_pipeline_get_bus( mPipeline );
-      guint bus_watch_id = gst_bus_add_watch( bus, bus_call, self() );
-      gst_object_unref (bus);
+      mLoop.reset( g_main_loop_new( NULL, FALSE ), finalizeMainLoop );
+      mPipeline.setBusCallback( boost::bind( &CGstPlayerPipeline::onBusCall, self(), _1, _2 ) );
       boost::thread mainLoopRunner = boost::thread( [this]() {
-         g_main_loop_run( mLoop );
+         GST_CAT_DEBUG( player_debug, "Main loop started" );
+         g_main_loop_run( mLoop.get() );
+         GST_CAT_DEBUG( player_debug, "Main loop stopped" );
       } );
       mainLoopRunner.detach();
    }
@@ -79,29 +90,38 @@ public:
    bool startPlaying( const std::string& filename )
    {
       bool result = false;
-      if ( !isPlaying() )
+      GST_CAT_DEBUG( player_debug, "startPlaying" );
+      if ( !mPipeline.isInState( GST_STATE_PLAYING ) )
       {
          {
             boost::lock_guard<boost::mutex> lock( mConditionGuard );
             mIsEos = false;
+            GST_CAT_DEBUG( player_debug, "mIsEos set to false" );
          }
-         g_object_set( G_OBJECT( mFileSrc ), FILESRC_LOCATION_PARAM, filename.c_str(), NULL );
-         gst_element_set_state( GST_ELEMENT( mPipeline ), GST_STATE_PLAYING );
-         result = isPlaying();
+         mFileSrc.setProperty( FILESRC_LOCATION_PARAM, filename );
+         GST_CAT_DEBUG( player_debug, "Set file name %s", filename.c_str() );
+         result = mPipeline.setState( GST_STATE_PLAYING, true );
+         GST_CAT_DEBUG( player_debug, "Set state result: %d", result );
       }
       return result;
    }
 
    void stopPlaying( void )
    {
-      if ( isPlaying() )
+      GST_CAT_DEBUG( player_debug, "stopPlaying" );
+      if ( mPipeline.getState() != NULL )
       {
-         gst_element_set_state( GST_ELEMENT( mPipeline ), GST_STATE_NULL );
-         isPlaying();
+         if ( !mPipeline.setState( GST_STATE_NULL ) )
+         {
+            GST_CAT_ERROR( player_debug, "Could not set pipeline state to NULL" );
+            THROW_FATAL( PLAYER_ERROR_MSG );
+         }
          {
             boost::lock_guard<boost::mutex> lock( mConditionGuard );
             mIsEos = true;
+            GST_CAT_DEBUG( player_debug, "mIsEos set to true" );
          }
+         GST_CAT_DEBUG( player_debug, "Notify all" );
          mCondition.notify_all();
       }
    }
@@ -109,47 +129,28 @@ public:
    bool waitForCompletion( void )
    {
       boost::unique_lock<boost::mutex> lock( mConditionGuard );
-      return mCondition.wait_for( lock, 
+      GST_CAT_DEBUG( player_debug, "waitForCompletion..." );
+      bool result = mCondition.wait_for( lock, 
          boost::chrono::seconds( MAX_PLAYBACK_DURATION_SEC ), 
          boost::bind( &CGstPlayerPipeline::isEos, this ) );
+      GST_CAT_DEBUG( player_debug, "waitForCompletion result: %d", result );
+      return result;
    }
 
    bool isPlaying( void )
    {
-      bool playing = false;
-      GstState state;
-      GstState pending;
-      GstStateChangeReturn result = gst_element_get_state( GST_ELEMENT( mPipeline ), &state, &pending, MAX_WAIT_TIMEOUT );
-      if ( result == GST_STATE_CHANGE_FAILURE )
-      {
-         THROW_FATAL( PLAYER_ERROR_MSG );
-      }
-      if ( state == GST_STATE_PLAYING )
-      {
-         playing = true;
-      }
-      else
-      {
-         if ( state == GST_STATE_NULL )
-         {
-            playing = false;
-         }
-         else
-         {
-            THROW_FATAL( PLAYER_ERROR_MSG );
-         }
-      }
-      return playing;
+      bool result = mPipeline.isInState( GST_STATE_PLAYING );
+      GST_CAT_DEBUG( player_debug, "isPlaying: %", result );
+      return result;
    }
 
    ~CGstPlayerPipeline( void )
    {
+      GST_CAT_DEBUG( player_debug, "destructor" );
       if ( isPlaying() )
       {
          stopPlaying();
       }
-      gst_object_unref( GST_OBJECT( mPipeline ) );
-      g_main_loop_quit( mLoop );
    }
 
 private:
@@ -163,7 +164,14 @@ private:
       switch ( GST_MESSAGE_TYPE( msg ) )
       {
       case GST_MESSAGE_EOS:
-         stopPlaying();
+         GST_CAT_DEBUG( player_debug, "EOS message received on BUS" );
+         {
+            boost::lock_guard<boost::mutex> lock( mConditionGuard );
+            mIsEos = true;
+            GST_CAT_DEBUG( player_debug, "mIsEos set to true" );
+         }
+         GST_CAT_DEBUG( player_debug, "Notify all" );
+         mCondition.notify_all();
          break;
       case GST_MESSAGE_ERROR: 
       {
@@ -181,17 +189,12 @@ private:
       }
    }
 
-   static gboolean bus_call( GstBus* bus, GstMessage* msg, gpointer data )
-   {
-      CGstPlayerPipeline* player = reinterpret_cast<CGstPlayerPipeline*>( data );
-      player->onBusCall( bus, msg );
-      return TRUE;
-   }
-
 private:
-   GstPipeline* mPipeline;
-   GstElement* mFileSrc;
-   GMainLoop* mLoop;
+   CGstPipeline mPipeline;
+   CGstElement mFileSrc;
+   CGstElement mSink;
+   CGstPad mSinkPad;
+   MainLoopPtr mLoop;
    bool mIsEos;
    boost::thread mLoopThread;
    boost::mutex mConditionGuard;
@@ -211,7 +214,11 @@ api::player::FilePlayerPtr CFilePlayer::create( void )
 
 CFilePlayer::~CFilePlayer( void )
 {
-
+   if ( mNotifierThread.joinable() )
+   {
+      mNotifierThread.interrupt();
+      mNotifierThread.join();
+   }
 }
 
 bool CFilePlayer::startPlaying( const std::string& fileName )
@@ -222,11 +229,24 @@ bool CFilePlayer::startPlaying( const std::string& fileName )
    result = mPlayerPipeline->startPlaying( fileName );
    if ( result )
    {
-      boost::thread notifier = boost::thread( [this, file]() {
-         mPlayerPipeline->waitForCompletion();
+      mNotifierThread = boost::thread( [this, file]() {
+         bool result = false;
+         try
+         {
+            GST_CAT_DEBUG( player_debug, "mNotifierThread wait for complition..." );
+            result = mPlayerPipeline->waitForCompletion();
+            GST_CAT_DEBUG( player_debug, "mNotifierThread wait for complition result: %d", result );
+         }
+         catch (...)
+         {
+
+         }
+         if ( !result )
+         {
+            THROW_FATAL( PLAYER_ERROR_MSG );
+         }
          mStopPlaying( StopPlayingData( file ) );
       } );
-      notifier.detach();
    }
    mStartPlaying( StartPlayingData( fileName, result ) );
    return result;
@@ -239,10 +259,18 @@ void CFilePlayer::stopPlaying( void )
 
 bool CFilePlayer::playFile( const std::string& fileName )
 {
+   GST_CAT_DEBUG( player_debug, "playFile" );
    bool result = startPlaying( fileName );
    if ( result )
    {
+      GST_CAT_DEBUG( player_debug, "main_thread wait for complition..." );
       result = mPlayerPipeline->waitForCompletion();
+      GST_CAT_DEBUG( player_debug, "main_thread wait for complition result: %d", result );
+      if ( !result )
+      {
+         THROW_FATAL( PLAYER_ERROR_MSG );
+      }
+      mPlayerPipeline->stopPlaying();
    }
    return result;
 }

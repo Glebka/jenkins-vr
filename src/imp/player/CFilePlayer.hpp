@@ -8,6 +8,7 @@
  ************************************************************************/
 #pragma once
 
+#include <boost/thread.hpp>
 #include <api/IFilePlayer.hpp>
 
 class CFilePlayer: public api::player::IFilePlayer, boost::noncopyable
@@ -61,4 +62,5 @@ private:
    GstPlayerPipelinePtr mPlayerPipeline;
    api::player::StartPlayingSignal_t mStartPlaying;
    api::player::StopPlayingSignal_t mStopPlaying;
+   boost::thread mNotifierThread;
 };
