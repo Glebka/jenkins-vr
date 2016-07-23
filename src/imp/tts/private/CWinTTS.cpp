@@ -26,9 +26,8 @@ static void WINAPI_RUN_CHECKED( HRESULT winApiCallResult, const std::string& err
 {
    if ( FAILED( winApiCallResult ) )
    {
-      std::string message( "Can't initialize COM instance." );
-      CLogger::fatal() << message;
-      throw std::exception( message.c_str() );
+      CLogger::fatal() << errorMessage;
+      throw std::exception( errorMessage.c_str() );
    }
 }
 
