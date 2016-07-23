@@ -4,7 +4,7 @@ services:
   - docker
   
 before_install:
-  - docker build -t buildenv .
+  - docker pull glebka/jenkins-vr-buildenv
 
 script:
-  - docker run --rm -t -i buildenv /bin/sh -c "cd /root/jenkins-vr; cmake . && make"
+  - docker run --rm -t -i glebka/jenkins-vr-buildenv /bin/sh -c "git clone https://github.com/Glebka/jenkins-vr.git; cd /jenkins-vr; cmake . && make"
