@@ -172,6 +172,7 @@ else(WIN32)
 		  /opt/local/lib
 		  /sw/lib/
 		  /usr/lib64
+		  /usr/lib/x86_64-linux-gnu
 		  /usr/lib
 		  /usr/local/include
 		  ${CMAKE_LIBRARY_PATH}

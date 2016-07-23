@@ -112,6 +112,7 @@ ELSE (GLIB2_LIBRARIES AND GLIB2_INCLUDE_DIRS )
 		  /sw/lib/
 		  /usr/lib64
 		  /usr/lib
+		  /usr/lib/x86_64-linux-gnu
 		  /usr/local/include
 		  ${CMAKE_LIBRARY_PATH}
 		PATH_SUFFIXES
@@ -144,6 +145,7 @@ ELSE (GLIB2_LIBRARIES AND GLIB2_INCLUDE_DIRS )
 		  /opt/local/lib
 		  /sw/lib
 		  /usr/lib
+		  /usr/lib/x86_64-linux-gnu
 		  /usr/local/lib
 		)
 		FIND_LIBRARY(
@@ -156,6 +158,7 @@ ELSE (GLIB2_LIBRARIES AND GLIB2_INCLUDE_DIRS )
 		  /opt/local/lib
 		  /sw/lib
 		  /usr/lib
+		  /usr/lib/x86_64-linux-gnu
 		  /usr/local/lib
 		)
 		FIND_LIBRARY(
@@ -168,6 +171,7 @@ ELSE (GLIB2_LIBRARIES AND GLIB2_INCLUDE_DIRS )
 		  /opt/local/lib
 		  /sw/lib
 		  /usr/lib
+		  /usr/lib/x86_64-linux-gnu
 		  /usr/local/lib
 		)
 		FIND_LIBRARY(
@@ -180,6 +184,7 @@ ELSE (GLIB2_LIBRARIES AND GLIB2_INCLUDE_DIRS )
 		  /opt/local/lib
 		  /sw/lib
 		  /usr/lib
+		  /usr/lib/x86_64-linux-gnu
 		  /usr/local/lib
 		)
 	ENDIF( WIN32 AND GSTREAMER_FOUND )
@@ -229,6 +234,7 @@ ELSE (GLIB2_LIBRARIES AND GLIB2_INCLUDE_DIRS )
 				/sw/lib
 				/usr/local/lib
 				/usr/lib
+				/usr/lib/x86_64-linux-gnu
 			)
 		ENDIF( WIN32 AND GSTREAMER_FOUND )
 
@@ -271,6 +277,7 @@ ELSE (GLIB2_LIBRARIES AND GLIB2_INCLUDE_DIRS )
 				/opt/local/lib
 				/sw/lib
 				/usr/lib
+				/usr/lib/x86_64-linux-gnu
 				/usr/local/lib
 			  )
 		ENDIF( WIN32 AND GSTREAMER_FOUND )
