@@ -1,0 +1,10 @@
+﻿#JSGF V1.0;
+grammar JenkinsVR;
+public <commands> = <build> | <status> | <garbage_loop> ;
+<build> = <build_key_word> project <project_name> | <build_key_word> <project_name>;
+<status> = <overall_status> | <project_status> ;
+<build_key_word> = soberi | sobrat' | pobildi | bild | sbildi ;
+<project_name> = GROOT ;
+<overall_status> = status | kak dela | nu chto tam ;
+<project_status> = <overall_status> s <project_name> | <overall_status> <project_name> ;
+<garbage_loop> = (G1 | G6 | G7 | G8 | G9 | G14 | G15 | G16 | G20 | G21 | G22 | G23 | G27 | G28 | G29 | G30 | G31 | G35 | G37 | G38 | G39)+ ;
