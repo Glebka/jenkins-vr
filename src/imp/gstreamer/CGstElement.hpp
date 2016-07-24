@@ -120,13 +120,6 @@ public:
    }
 
    /**
-    * Template specialization for string properties
-    * @sa getProperty()
-    */
-   template <>
-   std::string getProperty<std::string>( const std::string& propertyName ) const;
-
-   /**
     * Set the property value
     * @param propertyName - the property name
     * @param propertyValue - the property value
@@ -136,14 +129,6 @@ public:
    {
       g_object_set( G_OBJECT( mElement ), propertyName.c_str(), propertyValue, NULL );
    }
-
-   /**
-    * Template specialization for string properties
-    * @sa setProperty()
-    */
-   template <>
-   void setProperty<const std::string&>( const std::string& propertyName, const std::string& propertyValue );
-
 
 private:
    /**
