@@ -22,7 +22,7 @@ else()
 		DOWNLOAD_COMMAND ""
 		SOURCE_DIR ${PROJECT_SOURCE_DIR}/libs/sphinxbase
 		BUILD_IN_SOURCE 1
-		CONFIGURE_COMMAND ./configure --prefix=<INSTALL_DIR> --without-python --libdir=/usr/lib --includedir=/usr/include
+		CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=<INSTALL_DIR> --without-python --libdir=/usr/lib --includedir=/usr/include
 		BUILD_COMMAND make
 		INSTALL_COMMAND make install
 	)
@@ -30,7 +30,7 @@ else()
 		DOWNLOAD_COMMAND ""
 		SOURCE_DIR ${PROJECT_SOURCE_DIR}/libs/pocketsphinx
 		BUILD_IN_SOURCE 1
-		CONFIGURE_COMMAND ./configure --prefix=<INSTALL_DIR> --without-python --with-sphinxbase=auto --libdir=/usr/lib --includedir=/usr/include
+		CONFIGURE_COMMAND <SOURCE_DIR>/configure --prefix=<INSTALL_DIR> --without-python --with-sphinxbase=auto --libdir=/usr/lib --includedir=/usr/include
 		BUILD_COMMAND make
 		INSTALL_COMMAND make install
 		DEPENDS sphinxbase_ext
@@ -39,7 +39,7 @@ else()
 		DOWNLOAD_COMMAND ""
 		SOURCE_DIR ${PROJECT_SOURCE_DIR}/libs/curl
 		BUILD_IN_SOURCE 1
-		CONFIGURE_COMMAND ./buildconf && ./configure --prefix=<INSTALL_DIR> --enable-http --libdir=/usr/lib --includedir=/usr/include
+		CONFIGURE_COMMAND <SOURCE_DIR>/buildconf && <SOURCE_DIR>/configure --prefix=<INSTALL_DIR> --enable-http --libdir=/usr/lib --includedir=/usr/include
 		BUILD_COMMAND make
 		INSTALL_COMMAND make install
 	)
