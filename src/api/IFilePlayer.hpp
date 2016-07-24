@@ -71,7 +71,7 @@ namespace api
       class IFilePlayer
       {
       public:
-         virtual ~IFilePlayer( void ) = 0 {}
+         virtual ~IFilePlayer( void ) = 0;
 
          /**
           * Starts playing async. Returns immediately.
@@ -117,5 +117,6 @@ namespace api
           */
          virtual signals::connection onStopPlaying( const StopPlayingSignal_t::slot_type& slot ) = 0;
       };
+      IFilePlayer::~IFilePlayer( void ) {}
    }
 }

@@ -4,7 +4,7 @@ project(jenkins-vr)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
-find_package(GStreamer 1.8.2 REQUIRED)
+find_package(GStreamer 1.6.4 REQUIRED)
 find_package(GLIB2 REQUIRED)
 
 set(Boost_USE_STATIC_LIBS        ON CACHE BOOL "")
@@ -68,11 +68,20 @@ add_executable(jenkins-vr
 )
 
 if(NOT WIN32)
-	add_dependencies(jenkins-vr sphinxbase_ext pocketsphinx_ext curl_ext)
+	add_dependencies(jenkins-vr sphinxbase_ext pocketsphinx_ext)
 	include_directories(SYSTEM
-		${INSTALL_DIR}/include
+		usr/include/sphinxbase
+		usr/include/pocketsphinx
+		usr/local/include/sphinxbase
+		usr/local/include/pocketsphinx
 	)
-	link_directories(${INSTALL_DIR}/lib/)
+	link_directories(
+		/lib
+		/usr/lib
+		/usr/local/lib
+		/usr/lib64
+		/usr/lib/x86_64-linux-gnu
+	)
 endif()
 
 target_link_libraries(jenkins-vr

@@ -71,5 +71,4 @@ private:
 private:
    GstBusPtr mBus;
    GstBusCallback mCallback;
-   boost::mutex mCallbackGuard;
 };

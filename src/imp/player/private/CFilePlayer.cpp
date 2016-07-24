@@ -109,7 +109,7 @@ public:
    void stopPlaying( void )
    {
       GST_CAT_DEBUG( player_debug, "stopPlaying" );
-      if ( mPipeline.getState() != NULL )
+      if ( mPipeline.getState() != GST_STATE_NULL )
       {
          if ( !mPipeline.setState( GST_STATE_NULL ) )
          {

@@ -66,7 +66,7 @@ namespace api
       class ITextToSpeech
       {
       public:
-         virtual ~ITextToSpeech( void ) = 0 {};
+         virtual ~ITextToSpeech( void ) = 0;
 
          /**
           * Returns available TTS languages like en-US, en-GB, ru-RU, etc.
@@ -135,7 +135,7 @@ namespace api
           * @return signal-slot connection
           */
          virtual signals::connection onStopSpeaking( const StopSpeakingSignal_t::slot_type& slot ) = 0;
-
       };
+      ITextToSpeech::~ITextToSpeech( void ) {}
    }
 }

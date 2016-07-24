@@ -135,14 +135,8 @@ void CSphinxRecognizer::stopListening( void )
 {
    if ( mRecognizerPipeline->isListening() )
    {
-      if ( !mRecognizerPipeline->stopListening() )
-      {
-         THROW_FATAL( RECOGNIZER_ERROR_MSG );
-      }
-      else
-      {
-         mStopListening( api::asr::StopListeningData() );
-      }
+      mRecognizerPipeline->stopListening();
+      mStopListening( api::asr::StopListeningData() );
    }
 }
 
@@ -155,7 +149,6 @@ signals::connection CSphinxRecognizer::onStartListening( const api::asr::StartLi
 {
    return mStartListening.connect( slot );
 }
-
 
 signals::connection CSphinxRecognizer::onRecognitionResult( const api::asr::RecognitionResultSignal_t::slot_type& slot )
 {

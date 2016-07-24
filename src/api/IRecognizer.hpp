@@ -88,7 +88,7 @@ namespace api
       class IRecognizer
       {
       public:
-         virtual ~IRecognizer( void ) = 0 {}
+         virtual ~IRecognizer( void ) = 0;
 
          /**
           * Gets current recognition language
@@ -162,5 +162,6 @@ namespace api
           */
          virtual signals::connection onStopListening( const StopListeningSignal_t::slot_type& slot ) = 0;
       };
+      IRecognizer::~IRecognizer( void ) {}
    }
 }

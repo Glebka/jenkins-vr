@@ -67,7 +67,6 @@ CGstElement CGstPipeline::getElementByName( const std::string& elementName )
 
 void CGstPipeline::setBusCallback( const GstBusCallback& callback )
 {
-   boost::lock_guard<boost::mutex> guard( mCallbackGuard );
    mCallback = callback;
 }
 
@@ -87,7 +86,6 @@ void CGstPipeline::deallocateBus( GstBus* bus )
 gboolean CGstPipeline::busCallback( GstBus* bus, GstMessage* message, gpointer user_data )
 {
    CGstPipeline* pipeline = reinterpret_cast<CGstPipeline*>( user_data );
-   boost::lock_guard<boost::mutex> guard( pipeline->mCallbackGuard );
    if ( pipeline->mCallback )
    {
        pipeline->mCallback( bus, message );
