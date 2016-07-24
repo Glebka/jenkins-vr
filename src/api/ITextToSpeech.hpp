@@ -25,8 +25,8 @@ namespace api
       /**
        * StartSpeaking event data.
        * The instance of this struct is passed to event handler.
-       * @sa api::tts::ITextToSpeach::saySync()
-       * @sa api::tts::ITextToSpeach::sayAsync()
+       * @sa api::tts::ITextToSpeech::saySync()
+       * @sa api::tts::ITextToSpeech::sayAsync()
        * @sa api::tts::ITextToSpeech::onStartSpeaking()
        * @sa api::tts::StartSpeakingSignal_t
        */
@@ -50,8 +50,8 @@ namespace api
 
       /**
        * StopSpeaking event data (empty).
-       * @sa api::tts::ITextToSpeach::saySync()
-       * @sa api::tts::ITextToSpeach::stopSpeaking()
+       * @sa api::tts::ITextToSpeech::saySync()
+       * @sa api::tts::ITextToSpeech::stopSpeaking()
        * @sa api::tts::ITextToSpeech::onStopSpeaking()
        * @sa api::tts::StopSpeakingSignal_t
        */
@@ -136,6 +136,5 @@ namespace api
           */
          virtual signals::connection onStopSpeaking( const StopSpeakingSignal_t::slot_type& slot ) = 0;
       };
-      ITextToSpeech::~ITextToSpeech( void ) {}
    }
 }

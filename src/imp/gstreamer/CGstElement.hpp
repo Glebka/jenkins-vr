@@ -120,6 +120,13 @@ public:
    }
 
    /**
+    * Template specialization for string properties
+    * @sa getProperty()
+    */
+   template <>
+   std::string CGstElement::getProperty<std::string>( const std::string& propertyName ) const;
+
+   /**
     * Set the property value
     * @param propertyName - the property name
     * @param propertyValue - the property value
@@ -129,6 +136,14 @@ public:
    {
       g_object_set( G_OBJECT( mElement ), propertyName.c_str(), propertyValue, NULL );
    }
+
+   /**
+    * Template specialization for string properties
+    * @sa setProperty()
+    */
+   template <>
+   void CGstElement::setProperty<const std::string&>( const std::string& propertyName, const std::string& propertyValue );
+
 
 private:
    /**
@@ -142,27 +157,3 @@ private:
    CGstPad mSinkPad;
    std::string mName;
 };
-
-/**
- * Template specialization for string properties
- * @sa getProperty()
- */
-template <>
-std::string CGstElement::getProperty<std::string>( const std::string& propertyName ) const
-{
-   gchar* value = NULL;
-   g_object_get( G_OBJECT( mElement ), propertyName.c_str(), &value, NULL );
-   std::string propValue( value );
-   g_free( value );
-   return propValue;
-}
-
-/**
- * Template specialization for string properties
- * @sa setProperty()
- */
-template <>
-void CGstElement::setProperty<std::string>( const std::string& propertyName, std::string propertyValue )
-{
-   g_object_set( G_OBJECT( mElement ), propertyName.c_str(), propertyValue.c_str(), NULL );
-}

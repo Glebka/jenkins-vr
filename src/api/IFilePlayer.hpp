@@ -117,6 +117,5 @@ namespace api
           */
          virtual signals::connection onStopPlaying( const StopPlayingSignal_t::slot_type& slot ) = 0;
       };
-      IFilePlayer::~IFilePlayer( void ) {}
    }
 }

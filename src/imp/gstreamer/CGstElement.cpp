@@ -157,6 +157,22 @@ bool CGstElement::isInState( GstState state ) const
    return ( state == getState() );
 }
 
+template <>
+std::string CGstElement::getProperty<std::string>( const std::string& propertyName ) const
+{
+   gchar* value = NULL;
+   g_object_get( G_OBJECT( mElement ), propertyName.c_str(), &value, NULL );
+   std::string propValue( value );
+   g_free( value );
+   return propValue;
+}
+
+template <>
+void CGstElement::setProperty<const std::string&>( const std::string& propertyName, const std::string& propertyValue )
+{
+   g_object_set( G_OBJECT( mElement ), propertyName.c_str(), propertyValue.c_str(), NULL );
+}
+
 void CGstElement::extractName( void )
 {
    assert( isValid() );
