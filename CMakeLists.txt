@@ -84,6 +84,10 @@ if(NOT WIN32)
 	)
 endif()
 
+message(STATUS "GST LIBS: ${GSTREAMER_LIBRARIES}")
+message(STATUS "GLIB2 LIBS: ${GLIB2_LIBRARIES}")
+message(STATUS "BOOST LIBS: ${Boost_LIBRARIES}")
+
 target_link_libraries(jenkins-vr
    ${GSTREAMER_LIBRARIES}
    ${GLIB2_LIBRARIES}
