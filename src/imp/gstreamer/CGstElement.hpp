@@ -124,7 +124,7 @@ public:
     * @sa getProperty()
     */
    template <>
-   std::string CGstElement::getProperty<std::string>( const std::string& propertyName ) const;
+   std::string getProperty<std::string>( const std::string& propertyName ) const;
 
    /**
     * Set the property value
@@ -142,7 +142,7 @@ public:
     * @sa setProperty()
     */
    template <>
-   void CGstElement::setProperty<const std::string&>( const std::string& propertyName, const std::string& propertyValue );
+   void setProperty<const std::string&>( const std::string& propertyName, const std::string& propertyValue );
 
 
 private:
