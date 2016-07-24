@@ -6,6 +6,8 @@
  * @author  Hlieb Romanov
  * @brief   GStreamer element pad wrapper
  ************************************************************************/
+#pragma once
+
 #include <gst/gst.h>
 #include <string>
 #include <boost/function.hpp>

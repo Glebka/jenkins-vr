@@ -6,9 +6,9 @@
  * @author  Hlieb Romanov
  * @brief   Base class for all gstreamer element wrappers
  ************************************************************************/
-#include <gst/gst.h>
-#include <string>
+#pragma once
 
+#include <string>
 #include "CGstPad.hpp"
 
 /**
@@ -61,14 +61,14 @@ public:
     * Don't forget to check pad.isValid(), because some elements don't have src pads.
     * @return source pad of the element.
     */
-   virtual CGstPad getSrcPad( void );
+   virtual CGstPad& getSrcPad( void );
 
    /**
     * Get sink pad of this element ( if exists ).
     * Don't forget to check pad.isValid(), because some elements don't have sink pads.
     * @return sink pad of the element
     */
-   virtual CGstPad getSinkPad( void );
+   virtual CGstPad& getSinkPad( void );
 
    /**
     * Send event to this element
@@ -120,20 +120,6 @@ public:
    }
 
    /**
-    * Template specialization for string properties
-    * @sa getProperty()
-    */
-   template <>
-   std::string getProperty<std::string>( const std::string& propertyName ) const
-   {
-      gchar* value = NULL;
-      g_object_get( G_OBJECT( mElement ), propertyName.c_str(), &value, NULL );
-      std::string propValue( value );
-      g_free( value );
-      return propValue;
-   }
-
-   /**
     * Set the property value
     * @param propertyName - the property name
     * @param propertyValue - the property value
@@ -142,16 +128,6 @@ public:
    void setProperty( const std::string& propertyName, T propertyValue )
    {
       g_object_set( G_OBJECT( mElement ), propertyName.c_str(), propertyValue, NULL );
-   }
-
-   /**
-    * Template specialization for string properties
-    * @sa setProperty()
-    */
-   template <>
-   void setProperty<std::string>( const std::string& propertyName, std::string propertyValue )
-   {
-      g_object_set( G_OBJECT( mElement ), propertyName.c_str(), propertyValue.c_str(), NULL );
    }
 
 private:
@@ -166,3 +142,27 @@ private:
    CGstPad mSinkPad;
    std::string mName;
 };
+
+/**
+ * Template specialization for string properties
+ * @sa getProperty()
+ */
+template <>
+std::string CGstElement::getProperty<std::string>( const std::string& propertyName ) const
+{
+   gchar* value = NULL;
+   g_object_get( G_OBJECT( mElement ), propertyName.c_str(), &value, NULL );
+   std::string propValue( value );
+   g_free( value );
+   return propValue;
+}
+
+/**
+ * Template specialization for string properties
+ * @sa setProperty()
+ */
+template <>
+void CGstElement::setProperty<std::string>( const std::string& propertyName, std::string propertyValue )
+{
+   g_object_set( G_OBJECT( mElement ), propertyName.c_str(), propertyValue.c_str(), NULL );
+}

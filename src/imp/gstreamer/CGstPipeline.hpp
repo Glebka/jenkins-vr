@@ -6,6 +6,7 @@
  * @author  Hlieb Romanov
  * @brief   GStreamer pipeline wrapper
  ************************************************************************/
+#pragma once
 #include <boost/thread.hpp>
 #include "CGstElement.hpp"
 
@@ -47,15 +48,6 @@ public:
    void setBusCallback( const GstBusCallback& callback );
 
 private:
-   /**
-    * Hide these functions from the public scope.
-    */
-   virtual bool link( CGstElement& other ) { return false; };
-   virtual void unlink( CGstElement& other ) {}
-
-   virtual CGstPad getSrcPad( void ) { return CGstPad(); }
-   virtual CGstPad getSinkPad( void ) { return CGstPad(); }
-
    /**
     * Helper function to regiser the bus callback.
     */

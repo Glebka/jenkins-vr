@@ -31,7 +31,6 @@ include_directories(
    src
 )
 
-add_subdirectory(tests)
 add_subdirectory(libs)
 
 message(STATUS ${GSTREAMER_LIBRARIES})
@@ -68,6 +67,14 @@ add_executable(jenkins-vr
    ${sources}
 )
 
+if(NOT WIN32)
+	add_dependencies(jenkins-vr sphinxbase_ext pocketsphinx_ext curl_ext)
+	include_directories(SYSTEM
+		${INSTALL_DIR}/include
+	)
+	link_directories(${INSTALL_DIR}/lib/)
+endif()
+
 target_link_libraries(jenkins-vr
    ${GSTREAMER_LIBRARIES}
    ${GLIB2_LIBRARIES}
@@ -75,6 +82,7 @@ target_link_libraries(jenkins-vr
    sphinxbase
    pocketsphinx
 )
+
 if(WIN32)
    target_link_libraries(jenkins-vr
       sapi.lib

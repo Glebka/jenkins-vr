@@ -18,29 +18,29 @@ if(WIN32)
 	
 else()
 	message(STATUS "Adding external projects...")
-	ExternalProject_Add(sphinxbase
+	ExternalProject_Add(sphinxbase_ext
 		DOWNLOAD_COMMAND ""
-		SOURCE_DIR sphinxbase
-		CONFIGURE_COMMAND ${PROJECT_SOURCE_DIR}/libs/sphinxbase/autogen.sh --without-python --libdir=/usr/lib --includedir=/usr/include
+		SOURCE_DIR ${PROJECT_SOURCE_DIR}/libs/sphinxbase
+		BUILD_IN_SOURCE 1
+		CONFIGURE_COMMAND ./autogen.sh --prefix=<INSTALL_DIR> --without-python --libdir=/usr/lib --includedir=/usr/include
 		BUILD_COMMAND make
 		INSTALL_COMMAND make install
-		BUILD_IN_SOURCE 1
 	)
-	ExternalProject_Add(pocketsphinx
+	ExternalProject_Add(pocketsphinx_ext
 		DOWNLOAD_COMMAND ""
-		SOURCE_DIR pocketsphinx
-		CONFIGURE_COMMAND ${PROJECT_SOURCE_DIR}/libs/pocketsphinx/autogen.sh --without-python --with-sphinxbase=auto --libdir=/usr/lib --includedir=/usr/include
-		BUILD_COMMAND make
+		SOURCE_DIR ${PROJECT_SOURCE_DIR}/libs/pocketsphinx
 		BUILD_IN_SOURCE 1
+		CONFIGURE_COMMAND ./autogen.sh --prefix=<INSTALL_DIR> --without-python --with-sphinxbase=auto --libdir=/usr/lib --includedir=/usr/include
+		BUILD_COMMAND make
 		INSTALL_COMMAND make install
-		DEPENDS sphinxbase
+		DEPENDS sphinxbase_ext
 	)
-	ExternalProject_Add(curl
+	ExternalProject_Add(curl_ext
 		DOWNLOAD_COMMAND ""
-		SOURCE_DIR curl
-		CONFIGURE_COMMAND ${PROJECT_SOURCE_DIR}/libs/curl/buildconf && ${PROJECT_SOURCE_DIR}/libs/curl/configure --enable-http --libdir=/usr/lib --includedir=/usr/include
-		BUILD_COMMAND make
+		SOURCE_DIR ${PROJECT_SOURCE_DIR}/libs/curl
 		BUILD_IN_SOURCE 1
+		CONFIGURE_COMMAND ./buildconf && ./configure --prefix=<INSTALL_DIR> --enable-http --libdir=/usr/lib --includedir=/usr/include
+		BUILD_COMMAND make
 		INSTALL_COMMAND make install
 	)
 endif()

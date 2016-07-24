@@ -105,12 +105,12 @@ void CGstElement::unlink( CGstElement& other )
 }
 
 
-CGstPad CGstElement::getSrcPad( void )
+CGstPad& CGstElement::getSrcPad( void )
 {
    return mSrcPad;
 }
 
-CGstPad CGstElement::getSinkPad( void )
+CGstPad& CGstElement::getSinkPad( void )
 {
    return mSinkPad;
 }
