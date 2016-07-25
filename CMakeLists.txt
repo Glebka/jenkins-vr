@@ -33,7 +33,6 @@ include_directories(
 
 add_subdirectory(libs)
 
-message(STATUS ${GSTREAMER_LIBRARIES})
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Debug CACHE STRING
   "Choose the type of build: Debug/Release" FORCE)
