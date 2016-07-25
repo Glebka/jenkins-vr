@@ -10,13 +10,10 @@
 
 #ifdef _WIN32
 
+#include <Windows.h>
 #include <sapi.h>
 #include <map>
 #include <set>
-#include <atlbase.h>
-#include <atlconv.h>
-extern CComModule _Module;
-#include <atlcom.h>
 
 #include "api/ITextToSpeech.hpp"
 

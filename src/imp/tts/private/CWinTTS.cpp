@@ -8,9 +8,8 @@
  ************************************************************************/
 #ifdef _WIN32
 
+#include <tchar.h>
 #include <sstream>
-#include <set>
-#include <atlstr.h>
 #include <boost/format.hpp>
 #include <boost/thread.hpp>
 
@@ -21,6 +20,43 @@ using namespace api::tts;
 using namespace details;
 
 static const int MAX_WAIT_TIME_MS = 2 * 60 * 100;
+
+typedef boost::shared_ptr<ISpDataKey> ISpDataKeyPtr;
+typedef boost::shared_ptr<ISpObjectTokenCategory> ISpObjectTokenCategoryPtr;
+typedef boost::shared_ptr<IEnumSpObjectTokens> IEnumSpObjectTokensPtr;
+
+static void comDeleter( IUnknown* object )
+{
+   object->Release();
+}
+
+static std::string LPWSTR2string( LPWSTR wstring )
+{
+   int bufferSize = WideCharToMultiByte( CP_UTF8, 0, wstring, wcslen( wstring ), NULL, 0, NULL, NULL );
+   std::string buffer( bufferSize, 0 );
+   if ( WideCharToMultiByte( CP_UTF8, 0, wstring, wcslen( wstring ), 
+      const_cast<char*>( buffer.c_str() ), bufferSize, NULL, NULL ) == 0 )
+   {
+      std::string errorMessage( "Unable to convert UNICODE string to UTF-8." );
+      CLogger::fatal() << errorMessage;
+      throw std::runtime_error( errorMessage );
+   }
+   return buffer;
+}
+
+static std::wstring string2Wstring( const std::string& str )
+{
+   int wChars = MultiByteToWideChar( CP_UTF8, 0, str.c_str(), str.size(), NULL, 0 );
+   std::wstring buffer( wChars, 0 );
+   if ( MultiByteToWideChar( CP_UTF8, 0, str.c_str(), 
+         str.size(), const_cast<wchar_t*>( buffer.c_str() ), wChars ) == 0 )
+   {
+      std::string errorMessage( "Unable to convert UTF-8 string to UNICODE." );
+      CLogger::fatal() << errorMessage;
+      throw std::runtime_error( errorMessage );
+   }
+   return buffer;
+}
 
 static void WINAPI_RUN_CHECKED( HRESULT winApiCallResult, const std::string& errorMessage )
 {
@@ -65,11 +101,13 @@ namespace details
          assert( mVoiceToken != NULL );
 
          LPWSTR name = NULL;
-         CComPtr<ISpDataKey> pAttrs;
+         ISpDataKey* rpAttrs = NULL;
+         ISpDataKeyPtr pAttrs;
 
-         WINAPI_RUN_CHECKED( mVoiceToken->OpenKey( L"Attributes", &pAttrs ), "Can't get Attributes key from voice description." );
+         WINAPI_RUN_CHECKED( mVoiceToken->OpenKey( L"Attributes", &rpAttrs ), "Can't get Attributes key from voice description." );
+         pAttrs.reset( rpAttrs, comDeleter );
          WINAPI_RUN_CHECKED( pAttrs->GetStringValue( L"Name", &name ), "Can't get language code for voice" );
-         return std::string( CW2A( name ) );
+         return LPWSTR2string( name );
       }
 
       std::string getLanguage( void )
@@ -80,9 +118,11 @@ namespace details
          const int MAX_LOCALE_PART_LEN = 9;
 
          LPWSTR langCode = NULL;
-         CComPtr<ISpDataKey> pAttrs;
+         ISpDataKey* rpAttrs = NULL;
+         ISpDataKeyPtr pAttrs;
 
-         WINAPI_RUN_CHECKED( mVoiceToken->OpenKey( L"Attributes", &pAttrs ), "Can't get Attributes key from voice description." );
+         WINAPI_RUN_CHECKED( mVoiceToken->OpenKey( L"Attributes", &rpAttrs ), "Can't get Attributes key from voice description." );
+         pAttrs.reset( rpAttrs, comDeleter );
          WINAPI_RUN_CHECKED( pAttrs->GetStringValue( L"Language", &langCode ), "Can't get language code for voice" );
 
          std::wstringstream wss;
@@ -167,9 +207,9 @@ bool CWinTTS::setLanguage( const std::string& language )
 
 bool CWinTTS::sayAsync( const std::string& text )
 {
-   CA2W unicodeStr( text.c_str() );
+   std::wstring uniText = string2Wstring( text );
 
-   HRESULT hr = mVoice->Speak( unicodeStr, SPF_PURGEBEFORESPEAK | SPF_ASYNC, NULL );
+   HRESULT hr = mVoice->Speak( uniText.c_str(), SPF_PURGEBEFORESPEAK | SPF_ASYNC, NULL );
    if ( !FAILED( hr ) )
    {
       HANDLE waitHandle = mVoice->SpeakCompleteEvent();
@@ -231,13 +271,22 @@ void CWinTTS::enumerateVoices( void )
    assert( mVoices.empty() );
    assert( mLanguages.empty() );
 
-   CComPtr<ISpObjectTokenCategory> cpCategory;
-   CComPtr<IEnumSpObjectTokens> cpEnum = NULL;
+   ISpObjectTokenCategoryPtr cpCategory;
+   ISpObjectTokenCategory* rcpCategory = NULL;
+   IEnumSpObjectTokensPtr cpEnum;
+   IEnumSpObjectTokens* rcpEnum = NULL;
    ULONG ulCount = 0;
 
-   WINAPI_RUN_CHECKED( cpCategory.CoCreateInstance( CLSID_SpObjectTokenCategory ), "Can't initialize ISpObjectTokenCategory instance." );
+   WINAPI_RUN_CHECKED( CoCreateInstance(CLSID_SpObjectTokenCategory, 
+      NULL, CLSCTX_INPROC_SERVER, IID_ISpObjectTokenCategory, (void**)&rcpCategory), "Can't initialize ISpObjectTokenCategory instance." );
+
+   cpCategory.reset( rcpCategory, comDeleter );
+
    WINAPI_RUN_CHECKED( cpCategory->SetId( SPCAT_VOICES, false ), "Can't set ID SPCAT_VOICES for ISpObjectTokenCategory instance." );
-   WINAPI_RUN_CHECKED( cpCategory->EnumTokens( NULL, NULL, &cpEnum ), "Can't initialize IEnumSpObjectTokens instance." );
+   WINAPI_RUN_CHECKED( cpCategory->EnumTokens( NULL, NULL, &rcpEnum ), "Can't initialize IEnumSpObjectTokens instance." );
+
+   cpEnum.reset( rcpEnum, comDeleter );
+
    WINAPI_RUN_CHECKED( cpEnum->GetCount( &ulCount ), "Can't get number of voices from IEnumSpObjectTokens instance." );
 
    // Obtain a list of available voice tokens
